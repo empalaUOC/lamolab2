@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAMOLAB | Strategic Design Portfolio</title>
+    <style>
+        /* --- 1. SISTEMA DE DISEÑO "LAMOLAB" (Tus variables obligatorias) --- */
+        :root {
+            --bg-color: #EADCCB;        /* Beige Hueso */
+            --text-color: #4A3F35;      /* Marrón Café */
+            --accent-color: #15038C;    /* Azul Klein/Eléctrico */
+            --highlight: #D5A021;       /* Dorado/Mostaza */
+            --white-off: #F2F2E4;       /* Blanco Roto */
+            --border-style: 1px solid rgba(74, 63, 53, 0.2); /* Líneas sutiles tipo Branward */
+        }
+
+        /* RESET & BASE */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.4;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
+        ul { list-style: none; }
+
+        /* --- 2. ESTRUCTURA (LAYOUT MIXTO TOORMIX/BRANWARD) --- */
+        .container {
+            max-width: 1400px; /* Ancho generoso tipo agencia */
+            margin: 0 auto;
+            border-left: var(--border-style);
+            border-right: var(--border-style);
+            background-color: var(--bg-color);
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* HEADER STICKY (Navegación funcional) */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: var(--bg-color);
+            border-bottom: var(--border-style);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 900;
+            font-size: 1.5rem;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo span { color: var(--accent-color); } /* El punto azul */
+
+        nav ul { display: flex; gap: 30px; }
+        
+        nav a {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        /* Efecto Hover Subrayado Animado */
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--accent-color);
+            transition: width 0.3s;
+        }
+        nav a:hover::after { width: 100%; }
+        nav a:hover { color: var(--accent-color); }
+
+        /* --- 3. HERO SECTION (Estilo Branward - Manifiesto) --- */
+        .hero {
+            padding: 120px 40px;
+            border-bottom: var(--border-style);
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 60px;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 6vw, 6.5rem); /* Responsivo gigante */
+            font-weight: 900;
+            line-height: 0.9;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            color: var(--text-color);
+        }
+
+        .hero-intro {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            font-size: 1.2rem;
+            border-left: 2px solid var(--accent-color);
+            padding-left: 30px;
+        }
+
+        /* --- 4. PORTFOLIO GRID (Estilo Grapheine/Toormix Fusionado) --- */
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Responsive Masonry */
+        }
+
+        .project-card {
+            border-right: var(--border-style);
+            border-bottom: var(--border-style);
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+            group: hover;
+            transition: background-color 0.4s ease;
+            cursor: pointer;
+            min-height: 450px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Efecto Hover Tarjeta: Fondo Azul, Texto Blanco */
+        .project-card:hover {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        /* Etiquetas estilo Grapheine */
+        .tags {
+            font-family: monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .project-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .view-case {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0; /* Oculto hasta hover */
+            transform: translateY(20px);
+            transition: all 0.4s ease;
+        }
+
+        .project-card:hover .view-case {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- 5. FOOTER & CTA --- */
+        .cta-section {
+            padding: 100px 40px;
+            text-align: center;
+            border-bottom: var(--border-style);
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 20px 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--bg-color);
+            background-color: var(--text-color);
+            border-radius: 50px;
+            border: 2px solid var(--text-color);
+            margin-top: 30px;
+        }
+
+        .btn-primary:hover {
+            background-color: transparent;
+            color: var(--text-color);
+        }
+
+        footer {
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
+
+        /* --- 6. AVISO DE COOKIES FLOTANTE (Estilo solicitado) --- */
+        #cookie-banner {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 350px;
+            background-color: var(--text-color); /* Marrón Oscuro */
+            color: var(--bg-color); /* Texto Beige */
+            padding: 25px;
+            z-index: 9999;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex; /* Flex para mostrarlo */
+            flex-direction: column;
+            gap: 15px;
+            font-size: 0.9rem;
+            border-left: 5px solid var(--accent-color); /* Detalle de marca */
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-cookie {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.3s;
+        }
+
+        .btn-accept {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .btn-deny {
+            background-color: transparent;
+            color: var(--bg-color);
+            border: 1px solid var(--bg-color);
+        }
+
+        .btn-cookie:hover { opacity: 0.8; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .hero { grid-template-columns: 1fr; padding: 60px 20px; }
+            h1 { font-size: 3.5rem; }
+            .portfolio-grid { grid-template-columns: 1fr; }
+            header { padding: 20px; }
+            #cookie-banner { width: 90%; right: 5%; bottom: 20px; }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <header>
+        <a href="#" class="logo">LAMOLAB<span>.</span></a>
+        <nav>
+            <ul>
+                <li><a href="#work">Proyectos</a></li>
+                <li><a href="#studio">Agencia</a></li>
+                <li><a href="#contact">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Estrategia<br><span style="color:var(--accent-color);">Visual</span> &<br>Identidad.</h1>
+        <div class="hero-intro">
+            <p><strong>Coraje para liderar el cambio.</strong></p>
+            <br>
+            <p>Fusionamos la consultoría estratégica con el diseño de alto impacto. Ayudamos a marcas valientes a encontrar su voz en un mercado saturado.</p>
+        </div>
+    </section>
+
+    <section id="work" class="portfolio-grid">
+        
+        <article class="project-card" onclick="window.location.href='#case1'">
+            <div class="content-top">
+                <div class="tags">01 / Branding / Packaging</div>
+                <h2 class="project-title">Naturaleza Muerta</h2>
+                <p>Rediseño integral para una marca de cosmética orgánica honesta.</p>
+            </div>
+            <div class="view-case">Ver Caso de Estudio &rarr;</div>
+        </article>
+
+        <article class="project-card" onclick="window.location.href='#case2'">
+            <div class="content-top">
+                <div class="tags">02 / Editorial / Cultura</div>
+                <h2 class="project-title">Los Puentes de Zaragoza</h2>
+                <p>Libro de arte y patrimonio. Dirección de arte y maquetación.</p>
+            </div>
+            <div class="view-case">Ver Caso de Estudio &rarr;</div>
+        </article>
+
+        <article class="project-card" onclick="window.location.href='#case3'">
+            <div class="content-top">
+                <div class="tags">03 / Activismo / Digital</div>
+                <h2 class="project-title">Change Your Approach</h2>
+                <p>Campaña social multicanal para la concienciación climática.</p>
+            </div>
+            <div class="view-case">Ver Caso de Estudio &rarr;</div>
+        </article>
+
+        <article class="project-card" onclick="window.location.href='#case4'">
+            <div class="content-top">
+                <div class="tags">04 / Identidad Corporativa</div>
+                <h2 class="project-title">Branward System</h2>
+                <p>Consultoría de marca y arquitectura visual para sector banca.</p>
+            </div>
+            <div class="view-case">Ver Caso de Estudio &rarr;</div>
+        </article>
+
+    </section>
+
+    <section id="contact" class="cta-section">
+        <h2 style="font-size: 2.5rem; margin-bottom: 20px;">¿Hablamos de tu próximo proyecto?</h2>
+        <p>Estamos listos para transformar tu visión en una marca sólida.</p>
+        <a href="mailto:hola@lamolab.com" class="btn-primary">Iniciar Conversación</a>
+    </section>
+
+    <footer>
+        <div>© 2025 LAMOLAB. Todos los derechos reservados.</div>
+        <div>Zaragoza, España</div>
+        <div>
+            <a href="#">Legal</a> | <a href="#">Privacidad</a>
+        </div>
+    </footer>
+
+</div>
+
+<div id="cookie-banner">
+    <div style="font-weight: 700; text-transform: uppercase;">🍪 Política de Privacidad</div>
+    <p>Usamos cookies propias y de terceros para mejorar tu experiencia y mostrarte contenido relacionado con tus preferencias (y porque la ley nos obliga).</p>
+    <div class="cookie-buttons">
+        <button class="btn-cookie btn-accept" onclick="acceptCookies()">Aceptar Todo</button>
+        <button class="btn-cookie btn-deny" onclick="acceptCookies()">Solo Necesarias</button>
+    </div>
+</div>
+
+<script>
+    // Script simple para cerrar el banner de cookies
+    function acceptCookies() {
+        const banner = document.getElementById('cookie-banner');
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateY(100%)';
+        setTimeout(() => {
+            banner.style.display = 'none';
+        }, 500); // Espera a que termine la animación
+    }
+</script>
+
+</body>
+</html>
