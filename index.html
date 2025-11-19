@@ -17,6 +17,7 @@
             --highlight: #D5A021;     /* Mostaza */
             --white-off: #F2F2E4;     /* Blanco Roto */
             --dark-overlay: #1a1a1a;  /* Para cookies/modal */
+            --header-height: 90px;    /* Altura aproximada del header para cálculos */
         }
 
         html { scroll-behavior: smooth; }
@@ -63,6 +64,7 @@
             padding: 25px 40px;
             display: flex; justify-content: space-between; align-items: center;
             z-index: 1000;
+            height: var(--header-height); /* Definimos altura fija */
         }
         .brand { font-weight: 900; font-size: 1.5rem; line-height: 1; text-transform: uppercase; }
         .brand span { display: block; font-size: 0.7rem; font-weight: 400; font-family: monospace; margin-top: 5px; }
@@ -77,7 +79,7 @@
         /* --- HERO (PÁGINA 1 - FULL HEIGHT) --- */
         #home {
             padding: 100px 40px; border-bottom: 1px solid var(--text-color);
-            min-height: 100vh; /* Ocupa toda la pantalla como pediste */
+            min-height: 100vh; /* Ocupa toda la pantalla */
             display: flex; flex-direction: column; justify-content: center;
         }
         h1 {
@@ -92,11 +94,12 @@
             margin-left: auto; border-left: 3px solid var(--accent-color); padding-left: 20px;
         }
 
-        /* --- PORTFOLIO (PÁGINA 2 - TIPO IMAGEN 2) --- */
+        /* --- PORTFOLIO --- */
         #portfolio { 
             border-bottom: 1px solid var(--text-color); 
             min-height: 100vh; /* Ocupa al menos una pantalla */
             display: flex; flex-direction: column;
+            scroll-margin-top: var(--header-height); /* Ajuste para scroll */
         }
         
         .portfolio-filter-bar {
@@ -105,6 +108,8 @@
             display: flex; justify-content: space-between; align-items: center;
             font-family: 'Helvetica Neue', sans-serif; font-weight: 700; font-size: 0.9rem; text-transform: uppercase;
             flex-wrap: wrap; gap: 20px;
+            background-color: var(--bg-color);
+            z-index: 10;
         }
         .filter-group { display: flex; gap: 30px; }
         .filter-btn { opacity: 0.5; cursor: none; transition: opacity 0.3s; position: relative; }
@@ -113,17 +118,21 @@
         .sub-sectors { display: none; gap: 20px; margin-left: 40px; font-size: 0.8rem; opacity: 0.7; flex-wrap: wrap; }
         .sub-sectors.show { display: flex; }
 
-        /* Grid Vertical para "Todos" (Por defecto) */
+        /* --- GRID SYSTEM --- */
         .projects-grid {
             display: grid;
-            grid-template-columns: 1fr; /* Una columna vertical por defecto */
             width: 100%;
             flex-grow: 1; /* Ocupa el resto del espacio vertical */
+            transition: all 0.3s ease;
         }
-        
-        /* Clase para ancho completo en sectores */
-        .grid-full-width {
-             grid-template-columns: 1fr;
+
+        /* VISTA POR DEFECTO (TODOS): 3 COLUMNAS VERTICALES */
+        .projects-grid:not(.filtered) {
+            grid-template-columns: 1fr 1fr 1fr; /* 3 columnas */
+        }
+        /* VISTA FILTRADA (SECTORES): 1 COLUMNA ANCHO COMPLETO */
+        .projects-grid.filtered {
+            grid-template-columns: 1fr;
         }
 
 
@@ -131,19 +140,17 @@
             position: relative;
             cursor: none;
             overflow: hidden;
-            border-bottom: 1px solid var(--text-color); /* Separador horizontal */
-            min-height: 500px; /* Altura mínima para que se vean bien */
+            min-height: 80vh; /* Altura considerable */
+            border-right: 1px solid var(--text-color); /* Borde vertical por defecto */
+            border-bottom: none;
         }
-        .project-card:last-child { border-bottom: none; }
         
-        /* Ajuste para que en escritorio se vean en fila si NO estamos filtrando */
-         @media (min-width: 769px) {
-            .projects-grid:not(.filtered) {
-                grid-template-columns: 1fr; /* Mantenemos vertical para "Todos" según petición */
-            }
-             /* Si quieres que "Todos" sea horizontal en escritorio, cambia a: 
-             .projects-grid:not(.filtered) { grid-template-columns: 1fr 1fr 1fr; } 
-             y ajusta los bordes */
+        /* Ajustes de bordes según vista */
+        .projects-grid:not(.filtered) .project-card:last-child { border-right: none; }
+        
+        .projects-grid.filtered .project-card {
+            border-right: none;
+            border-bottom: 1px solid var(--text-color); /* Borde horizontal si están filtrados (aunque solo se ve uno) */
         }
 
 
@@ -160,7 +167,7 @@
         .bg-p3 { background-color: var(--highlight); color: var(--text-color); }
 
         .card-title {
-            font-size: clamp(2rem, 3vw, 3.5rem); /* Ajustado para caber en columnas */
+            font-size: clamp(2rem, 3vw, 3.5rem);
             font-weight: 900; text-transform: uppercase; line-height: 0.9; letter-spacing: -1px;
         }
         .card-cat { margin-top: 20px; font-family: monospace; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;}
@@ -193,7 +200,7 @@
             text-transform: uppercase; padding: 20px 40px; border: 2px solid var(--text-color);
         }
 
-        /* --- FOOTER (PÁGINA 4 - AJUSTADO) --- */
+        /* --- FOOTER (PÁGINA 4) --- */
         footer {
             background-color: var(--accent-color); 
             color: var(--bg-color); 
@@ -201,7 +208,7 @@
             display: flex; flex-direction: column; justify-content: space-between;
             min-height: 80vh; 
             position: relative; overflow: hidden;
-            id: "contact"; /* ID para detectar hover */
+            id: "contact";
         }
 
         .footer-top {
@@ -222,7 +229,6 @@
         }
 
         .footer-brand-big {
-            /* REDUCIDO UN POCO PARA QUE QUEPA */
             font-size: clamp(3rem, 13vw, 14rem); 
             font-weight: 900; text-transform: uppercase; line-height: 0.8; letter-spacing: -0.04em;
             text-align: center; width: 100%; margin: 20px 0;
@@ -278,12 +284,12 @@
 
 
         /* =========================================
-           RESPONSIVE AUTOMÁTICO (MÓVIL / TABLET)
+           RESPONSIVE (MÓVIL / TABLET)
            ========================================= */
         @media (max-width: 768px) {
             .page-frame { border: none; width: 100%; }
             
-            header { padding: 20px; flex-direction: column; gap: 20px; align-items: flex-start; }
+            header { padding: 20px; flex-direction: column; gap: 20px; align-items: flex-start; height: auto; }
             nav { width: 100%; overflow-x: auto; padding-bottom: 5px; }
             nav ul { gap: 10px; }
 
@@ -293,8 +299,9 @@
             .portfolio-filter-bar { padding: 20px; flex-direction: column; align-items: flex-start; gap: 15px; }
             .sub-sectors { margin-left: 0; flex-direction: column; gap: 10px; }
 
-            /* EN MÓVIL: Columna vertical (apilado) */
-            .projects-grid { grid-template-columns: 1fr !important; }
+            /* EN MÓVIL SIEMPRE UNA COLUMNA */
+            .projects-grid, .projects-grid:not(.filtered), .projects-grid.filtered { grid-template-columns: 1fr !important; }
+            
             .project-card { border-right: none; border-bottom: 1px solid var(--text-color); height: 60vh; }
             .card-title { font-size: 2.5rem; }
 
@@ -485,13 +492,18 @@
             e.preventDefault();
             const section = document.getElementById('portfolio');
             
-            // 1. Scroll a la sección
-            section.scrollIntoView({ behavior: 'smooth' });
+            // Ajuste considerando la altura del header
+            const offset = 0; 
+            // Queremos que el scroll baje un poco para que se vea la cabecera del section y empiece el grid
+            // Ajustaremos para que baje 100px extra después del top del elemento
             
-            // 2. Pequeño ajuste tras el scroll para mostrar un poco más
-            setTimeout(() => {
-                 window.scrollBy({ top: 150, behavior: 'smooth' }); // Baja 150px extra
-            }, 800); // Espera a que termine el primer scroll
+            const elementPosition = section.getBoundingClientRect().top + window.pageYOffset;
+            const offsetPosition = elementPosition - 80; // Deja espacio para el header sticky
+
+            window.scrollTo({
+                top: offsetPosition + 150, // +150px para bajar y ver la foto
+                behavior: "smooth"
+            });
             
             activateNav(e.target);
         }
@@ -508,23 +520,20 @@
             
             if (type === 'sectores') {
                 subGroup.classList.add('show');
-                grid.classList.add('filtered'); // Activa modo filtrado
-                // En modo sectores, por defecto mostramos todos verticalmente hasta elegir
-                 cards.forEach(card => card.style.display = 'block');
+                grid.classList.add('filtered'); // Activa modo filtrado (1 col)
+                // Mostrar todos inicialmente en filtrado, hasta elegir
+                cards.forEach(card => card.style.display = 'block');
             } else {
                 subGroup.classList.remove('show');
-                grid.classList.remove('filtered');
-                grid.classList.remove('grid-full-width'); // Quita ancho completo
+                grid.classList.remove('filtered'); // Desactiva filtrado (3 cols)
                 cards.forEach(card => card.style.display = 'block');
             }
         }
 
         function filterSpecific(cat) {
-            const grid = document.getElementById('projects-grid');
             const cards = document.querySelectorAll('.project-card');
             
-            grid.classList.add('grid-full-width'); // Activa ancho completo
-
+            // En modo sectores (filtered ya está activo), filtramos las cards
             cards.forEach(card => {
                 if (card.dataset.category === cat) {
                     card.style.display = 'block';
