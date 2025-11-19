@@ -113,22 +113,39 @@
         .sub-sectors { display: none; gap: 20px; margin-left: 40px; font-size: 0.8rem; opacity: 0.7; flex-wrap: wrap; }
         .sub-sectors.show { display: flex; }
 
-        /* Grid Horizontal para Escritorio (Como tu imagen 2) */
+        /* Grid Vertical para "Todos" (Por defecto) */
         .projects-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr; /* 3 Columnas iguales */
+            grid-template-columns: 1fr; /* Una columna vertical por defecto */
             width: 100%;
             flex-grow: 1; /* Ocupa el resto del espacio vertical */
         }
+        
+        /* Clase para ancho completo en sectores */
+        .grid-full-width {
+             grid-template-columns: 1fr;
+        }
+
 
         .project-card {
             position: relative;
             cursor: none;
             overflow: hidden;
-            border-right: 1px solid var(--text-color); /* Separador vertical */
+            border-bottom: 1px solid var(--text-color); /* Separador horizontal */
             min-height: 500px; /* Altura mínima para que se vean bien */
         }
-        .project-card:last-child { border-right: none; }
+        .project-card:last-child { border-bottom: none; }
+        
+        /* Ajuste para que en escritorio se vean en fila si NO estamos filtrando */
+         @media (min-width: 769px) {
+            .projects-grid:not(.filtered) {
+                grid-template-columns: 1fr; /* Mantenemos vertical para "Todos" según petición */
+            }
+             /* Si quieres que "Todos" sea horizontal en escritorio, cambia a: 
+             .projects-grid:not(.filtered) { grid-template-columns: 1fr 1fr 1fr; } 
+             y ajusta los bordes */
+        }
+
 
         /* Estados Tarjeta */
         .card-face-color {
@@ -277,7 +294,7 @@
             .sub-sectors { margin-left: 0; flex-direction: column; gap: 10px; }
 
             /* EN MÓVIL: Columna vertical (apilado) */
-            .projects-grid { grid-template-columns: 1fr; }
+            .projects-grid { grid-template-columns: 1fr !important; }
             .project-card { border-right: none; border-bottom: 1px solid var(--text-color); height: 60vh; }
             .card-title { font-size: 2.5rem; }
 
@@ -338,7 +355,7 @@
             <a href="#home" class="brand">LAMOLAB<span>Strategy & Design</span></a>
             <nav>
                 <ul>
-                    <li><a href="#portfolio" onclick="activateNav(this)">Portfolio</a></li>
+                    <li><a href="#portfolio" onclick="scrollToPortfolio(event)">Portfolio</a></li>
                     <li><a href="#about" onclick="activateNav(this)">Estudio</a></li>
                     <li><a href="#contact" onclick="activateNav(this)">Contacto</a></li>
                 </ul>
@@ -463,23 +480,51 @@
             resizeCanvas(windowWidth, windowHeight);
         }
 
+        // --- SCROLL A PORTFOLIO CON AJUSTE ---
+        function scrollToPortfolio(e) {
+            e.preventDefault();
+            const section = document.getElementById('portfolio');
+            
+            // 1. Scroll a la sección
+            section.scrollIntoView({ behavior: 'smooth' });
+            
+            // 2. Pequeño ajuste tras el scroll para mostrar un poco más
+            setTimeout(() => {
+                 window.scrollBy({ top: 150, behavior: 'smooth' }); // Baja 150px extra
+            }, 800); // Espera a que termine el primer scroll
+            
+            activateNav(e.target);
+        }
+
+
         // --- FILTROS PORTFOLIO ---
         function filterPortfolio(type) {
             document.getElementById('btn-todos').classList.remove('active');
             document.getElementById('btn-sectores').classList.remove('active');
             document.getElementById(`btn-${type}`).classList.add('active');
             const subGroup = document.getElementById('sub-sectors-group');
+            const grid = document.getElementById('projects-grid');
             const cards = document.querySelectorAll('.project-card');
+            
             if (type === 'sectores') {
                 subGroup.classList.add('show');
+                grid.classList.add('filtered'); // Activa modo filtrado
+                // En modo sectores, por defecto mostramos todos verticalmente hasta elegir
+                 cards.forEach(card => card.style.display = 'block');
             } else {
                 subGroup.classList.remove('show');
+                grid.classList.remove('filtered');
+                grid.classList.remove('grid-full-width'); // Quita ancho completo
                 cards.forEach(card => card.style.display = 'block');
             }
         }
 
         function filterSpecific(cat) {
+            const grid = document.getElementById('projects-grid');
             const cards = document.querySelectorAll('.project-card');
+            
+            grid.classList.add('grid-full-width'); // Activa ancho completo
+
             cards.forEach(card => {
                 if (card.dataset.category === cat) {
                     card.style.display = 'block';
