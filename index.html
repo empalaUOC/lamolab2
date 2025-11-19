@@ -124,7 +124,11 @@
             width: 100%;
             flex-grow: 1; /* Ocupa el resto del espacio vertical */
             transition: all 0.3s ease;
+            overflow-x: auto; /* Permite scroll horizontal si es necesario en móvil, aunque usamos grid */
+            /* Para drag scroll (arrastrar) */
+            cursor: grab; 
         }
+        .projects-grid:active { cursor: grabbing; }
 
         /* VISTA POR DEFECTO (TODOS): 3 COLUMNAS VERTICALES */
         .projects-grid:not(.filtered) {
@@ -138,11 +142,12 @@
 
         .project-card {
             position: relative;
-            cursor: none;
+            /* cursor: none;  Lo quitamos aquí para dejar el grab del contenedor o pointer */
             overflow: hidden;
             min-height: 80vh; /* Altura considerable */
             border-right: 1px solid var(--text-color); /* Borde vertical por defecto */
             border-bottom: none;
+            user-select: none; /* Evita seleccionar texto al arrastrar */
         }
         
         /* Ajustes de bordes según vista */
@@ -174,7 +179,12 @@
 
         .card-face-image {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+            object-fit: cover; 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: opacity 0.4s ease;
+            /* Ajuste para que se vea la cabecera (parte superior) de la imagen */
+            object-position: top center; 
         }
         
         .project-card.show-image .card-face-color { opacity: 0; }
@@ -300,7 +310,7 @@
             .sub-sectors { margin-left: 0; flex-direction: column; gap: 10px; }
 
             /* EN MÓVIL SIEMPRE UNA COLUMNA */
-            .projects-grid, .projects-grid:not(.filtered), .projects-grid.filtered { grid-template-columns: 1fr !important; }
+            .projects-grid, .projects-grid:not(.filtered), .projects-grid.filtered { grid-template-columns: 1fr !important; display: block; } /* Forzamos bloque para asegurar verticalidad y scroll nativo */
             
             .project-card { border-right: none; border-bottom: 1px solid var(--text-color); height: 60vh; }
             .card-title { font-size: 2.5rem; }
@@ -390,8 +400,9 @@
                 <div>[ SELECCIÓN 2025 ]</div>
             </div>
 
+            <!-- Grid de Proyectos con soporte para Drag -->
             <div class="projects-grid" id="projects-grid">
-                <div class="project-card bg-p1" id="card-1" data-category="arte" onclick="handleCardClick(1)">
+                <div class="project-card bg-p1" id="card-1" data-category="arte" onmousedown="handleCardClick(1, event)">
                     <div class="card-face-color">
                         <div class="card-title">NATURALEZA<br>MUERTA</div>
                         <div class="card-cat">Dirección de Arte</div>
@@ -399,7 +410,7 @@
                     <img src="naturaleza1.jpg" class="card-face-image" alt="Project Cover">
                 </div>
 
-                <div class="project-card bg-p2" id="card-2" data-category="editorial" onclick="handleCardClick(2)">
+                <div class="project-card bg-p2" id="card-2" data-category="editorial" onmousedown="handleCardClick(2, event)">
                     <div class="card-face-color">
                         <div class="card-title">PUENTES DE<br>ZARAGOZA</div>
                         <div class="card-cat">Editorial</div>
@@ -407,7 +418,7 @@
                     <img src="puentes1.jpg" class="card-face-image" alt="Project Cover">
                 </div>
 
-                <div class="project-card bg-p3" id="card-3" data-category="campana" onclick="handleCardClick(3)">
+                <div class="project-card bg-p3" id="card-3" data-category="campana" onmousedown="handleCardClick(3, event)">
                     <div class="card-face-color">
                         <div class="card-title">CHANGE YOUR<br>APPROACH</div>
                         <div class="card-cat">Activismo</div>
@@ -494,14 +505,13 @@
             
             // Ajuste considerando la altura del header
             const offset = 0; 
-            // Queremos que el scroll baje un poco para que se vea la cabecera del section y empiece el grid
-            // Ajustaremos para que baje 100px extra después del top del elemento
             
             const elementPosition = section.getBoundingClientRect().top + window.pageYOffset;
-            const offsetPosition = elementPosition - 80; // Deja espacio para el header sticky
+            // Ajustamos para que baje un poco más y muestre la parte superior de las tarjetas
+            const offsetPosition = elementPosition - 50; 
 
             window.scrollTo({
-                top: offsetPosition + 150, // +150px para bajar y ver la foto
+                top: offsetPosition, 
                 behavior: "smooth"
             });
             
@@ -543,16 +553,84 @@
             });
         }
 
-        // --- CLICKS TARJETAS ---
-        let clickState = { 1: 0, 2: 0, 3: 0 };
-        function handleCardClick(id) {
-            const card = document.getElementById(`card-${id}`);
-            if (clickState[id] === 0) {
-                card.classList.add('show-image');
-                clickState[id] = 1;
-            } else {
-                openModal(id);
+        // --- DRAG SCROLL LOGIC & CLICKS ---
+        const slider = document.getElementById('projects-grid');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let wasDragged = false; // Flag para distinguir clic de arrastre
+
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            wasDragged = false;
+            slider.classList.add('active');
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+
+        slider.addEventListener('mouseleave', () => {
+            isDown = false;
+            slider.classList.remove('active');
+        });
+
+        slider.addEventListener('mouseup', () => {
+            isDown = false;
+            slider.classList.remove('active');
+        });
+
+        slider.addEventListener('mousemove', (e) => {
+            if(!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 2; // Velocidad del scroll
+            // Solo hacemos scroll horizontal si no estamos en modo filtrado (sectores), que es vertical
+            if(!slider.classList.contains('filtered')) {
+                // En tu caso, el grid "Todos" es horizontal en escritorio pero usa grid normal, 
+                // no overflow-x. Si quieres arrastrar para moverte, normalmente es con overflow.
+                // Como usamos grid, el "drag" para mover la pantalla puede referirse a scroll vertical o 
+                // simular scroll horizontal si fuera un carrusel.
+                // Asumiremos que quieres moverte por la página (scroll vertical) al arrastrar en horizontal/vertical
+                // o scroll horizontal si el contenedor lo permitiera.
+                // Dado el layout Grid actual que ocupa todo el ancho sin scroll horizontal, 
+                // implementaremos scroll de ventana con el drag.
+                window.scrollBy(-walk, 0); // Scroll horizontal de ventana si hubiera, o vertical si ajustamos Y
+                // Para scroll "mover la pantalla":
+                 const y = e.pageY - slider.offsetTop;
+                 // const walkY = (y - startY) ...
+                 // Implementación simple de scroll vertical con drag:
+                 window.scrollBy(0, -e.movementY);
+                 window.scrollBy(-e.movementX, 0);
+                 wasDragged = true;
             }
+        });
+
+
+        // --- CLICKS TARJETAS (Modificado para detectar drag) ---
+        let clickState = { 1: 0, 2: 0, 3: 0 };
+        
+        function handleCardClick(id, event) {
+            // Usamos onmousedown en el HTML para pasar el evento, pero la lógica de clic real 
+            // se debe ejecutar en mouseup si NO hubo arrastre.
+            // Simplificamos: si se llama a esta función es porque se pulsó el ratón.
+            // Esperamos al mouseup para confirmar si fue click o drag.
+            
+            const card = document.getElementById(`card-${id}`);
+            
+            // Listener de un solo uso para el mouseup
+            const onMouseUp = () => {
+                if (!wasDragged) {
+                    // Es un clic limpio
+                    if (clickState[id] === 0) {
+                        card.classList.add('show-image');
+                        clickState[id] = 1;
+                    } else {
+                        openModal(id);
+                    }
+                }
+                // Limpiar listeners
+                document.removeEventListener('mouseup', onMouseUp);
+            };
+            document.addEventListener('mouseup', onMouseUp);
         }
 
         // --- MODAL ---
