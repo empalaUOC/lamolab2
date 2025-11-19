@@ -3,380 +3,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LAMOLAB | Strategic Design Portfolio</title>
+    <title>LAMOLAB | Portfolio Interactivo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <style>
-        /* --- 1. SISTEMA DE DISEÑO "LAMOLAB" (Tus variables obligatorias) --- */
+        /* --- 1. VARIABLES DE MARCA --- */
         :root {
-            --bg-color: #EADCCB;        /* Beige Hueso */
-            --text-color: #4A3F35;      /* Marrón Café */
-            --accent-color: #15038C;    /* Azul Klein/Eléctrico */
-            --highlight: #D5A021;       /* Dorado/Mostaza */
-            --white-off: #F2F2E4;       /* Blanco Roto */
-            --border-style: 1px solid rgba(74, 63, 53, 0.2); /* Líneas sutiles tipo Branward */
+            --bg-color: #EADCCB;      /* Beige Hueso */
+            --text-color: #4A3F35;    /* Marrón Café */
+            --accent-color: #15038C;  /* Azul Klein */
+            --highlight: #D5A021;     /* Mostaza */
+            --white-off: #F2F2E4;     /* Blanco Roto */
         }
 
-        /* RESET & BASE */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         html { scroll-behavior: smooth; }
+        * { box-sizing: border-box; margin: 0; padding: 0; cursor: none; /* Ocultamos cursor nativo para ver el de p5 */ }
+        
+        /* Restauramos cursor puntero en elementos clicables */
+        a, button, .project-card, .close-modal { cursor: pointer; }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            line-height: 1.4;
-            -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
         }
 
-        a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
-        ul { list-style: none; }
-
-        /* --- 2. ESTRUCTURA (LAYOUT MIXTO TOORMIX/BRANWARD) --- */
-        .container {
-            max-width: 1400px; /* Ancho generoso tipo agencia */
-            margin: 0 auto;
-            border-left: var(--border-style);
-            border-right: var(--border-style);
-            background-color: var(--bg-color);
-            position: relative;
-            min-height: 100vh;
+        /* Lienzo p5.js (Fondo del cursor) */
+        #p5-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 9999;
+            pointer-events: none; /* Permite hacer clic a través del dibujo */
         }
 
-        /* HEADER STICKY (Navegación funcional) */
+        /* --- HEADER --- */
         header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            position: sticky; top: 0;
             background-color: var(--bg-color);
-            border-bottom: var(--border-style);
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border-bottom: 1px solid var(--text-color);
+            padding: 25px 40px;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            z-index: 1000;
         }
-
-        .logo {
-            font-weight: 900;
-            font-size: 1.5rem;
-            letter-spacing: -1px;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .brand { font-weight: 900; font-size: 1.5rem; line-height: 1; text-transform: uppercase; text-decoration: none; color: var(--text-color); }
+        .brand span { display: block; font-size: 0.7rem; font-weight: 400; font-family: monospace; margin-top: 5px; }
         
-        .logo span { color: var(--accent-color); } /* El punto azul */
-
-        nav ul { display: flex; gap: 30px; }
-        
+        nav ul { display: flex; gap: 15px; list-style: none; }
         nav a {
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
+            font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;
+            border: 1px solid var(--text-color); padding: 10px 20px; border-radius: 50px; text-decoration: none; color: var(--text-color);
         }
+        nav a:hover { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
 
-        /* Efecto Hover Subrayado Animado */
-        nav a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--accent-color);
-            transition: width 0.3s;
+        /* --- HERO --- */
+        #home {
+            padding: 120px 40px; border-bottom: 1px solid var(--text-color);
+            min-height: 85vh; display: flex; flex-direction: column; justify-content: center;
         }
-        nav a:hover::after { width: 100%; }
-        nav a:hover { color: var(--accent-color); }
-
-        /* --- 3. HERO SECTION (Estilo Branward - Manifiesto) --- */
-        .hero {
-            padding: 120px 40px;
-            border-bottom: var(--border-style);
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 60px;
-        }
-
         h1 {
-            font-size: clamp(3rem, 6vw, 6.5rem); /* Responsivo gigante */
+            font-size: clamp(4rem, 9vw, 9rem); font-weight: 900; line-height: 0.85;
+            text-transform: uppercase; letter-spacing: -3px; margin-bottom: 40px; margin-left: -5px;
+        }
+        /* Palabra MÉTODO en Azul Sólido */
+        .highlight-blue { color: var(--accent-color); }
+        
+        .hero-copy {
+            max-width: 500px; font-size: 1.2rem; line-height: 1.4;
+            margin-left: auto; border-left: 3px solid var(--accent-color); padding-left: 20px;
+        }
+
+        /* --- SECCIÓN PROYECTOS (Estilo Grapheine) --- */
+        #work {
+            background-color: var(--text-color); /* Fondo oscuro para contraste */
+            padding-bottom: 0;
+        }
+
+        .work-header {
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .work-title {
+            color: var(--bg-color); /* Color Beige de la paleta */
+            font-size: 3rem;
             font-weight: 900;
-            line-height: 0.9;
-            letter-spacing: -2px;
             text-transform: uppercase;
-            color: var(--text-color);
+            letter-spacing: 5px;
         }
 
-        .hero-intro {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            font-size: 1.2rem;
-            border-left: 2px solid var(--accent-color);
-            padding-left: 30px;
-        }
-
-        /* --- 4. PORTFOLIO GRID (Estilo Grapheine/Toormix Fusionado) --- */
-        .portfolio-grid {
+        .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Responsive Masonry */
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            width: 100%;
         }
 
         .project-card {
-            border-right: var(--border-style);
-            border-bottom: var(--border-style);
-            padding: 60px 40px;
             position: relative;
+            height: 500px; /* Altura imponente */
             overflow: hidden;
-            group: hover;
-            transition: background-color 0.4s ease;
-            cursor: pointer;
-            min-height: 450px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            border: 1px solid var(--bg-color); /* Línea fina beige */
         }
 
-        /* Efecto Hover Tarjeta: Fondo Azul, Texto Blanco */
-        .project-card:hover {
-            background-color: var(--accent-color);
-            color: #fff;
+        .project-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            filter: grayscale(20%);
         }
 
-        /* Etiquetas estilo Grapheine */
-        .tags {
-            font-family: monospace;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            opacity: 0.7;
+        .project-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: rgba(21, 3, 140, 0.0); /* Transparente al inicio */
+            transition: background 0.4s;
         }
 
-        .project-title {
+        /* Letras animadas encima de la imagen */
+        .project-text {
             font-size: 3rem;
-            font-weight: 800;
-            line-height: 1;
-            margin-bottom: 20px;
-            letter-spacing: -1px;
-        }
-
-        .view-case {
-            font-weight: 700;
+            font-weight: 900;
+            color: transparent; /* Texto invisible inicialmente */
+            -webkit-text-stroke: 1px var(--bg-color); /* Solo borde beige */
             text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            opacity: 0; /* Oculto hasta hover */
+            text-align: center;
+            transition: all 0.4s;
             transform: translateY(20px);
-            transition: all 0.4s ease;
+            opacity: 0;
         }
 
-        .project-card:hover .view-case {
+        /* EFECTOS HOVER */
+        .project-card:hover .project-img {
+            transform: scale(1.05); /* Zoom suave */
+            filter: grayscale(0%);
+        }
+        .project-card:hover .project-overlay {
+            background: rgba(74, 63, 53, 0.4); /* Oscurece un poco */
+        }
+        .project-card:hover .project-text {
+            color: var(--bg-color); /* Se rellena de Beige */
             opacity: 1;
             transform: translateY(0);
         }
-
-        /* --- 5. FOOTER & CTA --- */
-        .cta-section {
-            padding: 100px 40px;
-            text-align: center;
-            border-bottom: var(--border-style);
+        /* Cambio de color del texto al pasar el cursor específicamente sobre el texto */
+        .project-text:hover {
+            color: var(--accent-color); /* Se vuelve Azul al tocar letras */
+            -webkit-text-stroke: 0;
         }
 
-        .btn-primary {
-            display: inline-block;
-            padding: 20px 50px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--bg-color);
-            background-color: var(--text-color);
-            border-radius: 50px;
-            border: 2px solid var(--text-color);
-            margin-top: 30px;
-        }
-
-        .btn-primary:hover {
-            background-color: transparent;
-            color: var(--text-color);
-        }
-
-        footer {
-            padding: 40px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            opacity: 0.6;
-        }
-
-        /* --- 6. AVISO DE COOKIES FLOTANTE (Estilo solicitado) --- */
-        #cookie-banner {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 350px;
-            background-color: var(--text-color); /* Marrón Oscuro */
-            color: var(--bg-color); /* Texto Beige */
-            padding: 25px;
-            z-index: 9999;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            display: flex; /* Flex para mostrarlo */
-            flex-direction: column;
-            gap: 15px;
-            font-size: 0.9rem;
-            border-left: 5px solid var(--accent-color); /* Detalle de marca */
-            animation: slideUp 0.5s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .cookie-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .btn-cookie {
-            padding: 8px 16px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            cursor: pointer;
-            border: none;
-            transition: opacity 0.3s;
-        }
-
-        .btn-accept {
+        /* --- MODALES (Detalle del proyecto) --- */
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed; z-index: 10000; left: 0; top: 0;
+            width: 100%; height: 100%; overflow: auto;
             background-color: var(--bg-color);
-            color: var(--text-color);
+            animation: fadeIn 0.3s;
         }
 
-        .btn-deny {
-            background-color: transparent;
-            color: var(--bg-color);
-            border: 1px solid var(--bg-color);
+        .modal-content {
+            max-width: 1000px; margin: 50px auto; padding: 40px;
+            position: relative;
         }
 
-        .btn-cookie:hover { opacity: 0.8; }
+        .close-modal {
+            position: fixed; top: 30px; right: 40px;
+            font-size: 40px; font-weight: bold; color: var(--text-color);
+            transition: 0.3s; z-index: 10001;
+        }
+        .close-modal:hover { color: var(--accent-color); }
 
-        /* RESPONSIVE */
+        .modal-img { width: 100%; margin-bottom: 20px; }
+        .modal-title { font-size: 3rem; margin-bottom: 20px; color: var(--accent-color); }
+        .modal-desc { font-size: 1.2rem; line-height: 1.6; margin-bottom: 40px; max-width: 700px; }
+
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+
+        /* --- ABOUT --- */
+        #about {
+            display: grid; grid-template-columns: 1fr 1fr; min-height: 80vh;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid var(--text-color);
+        }
+        .about-visual {
+            border-right: 1px solid var(--text-color);
+            display: flex; align-items: center; justify-content: center;
+            background-color: rgba(74, 63, 53, 0.05);
+            overflow: hidden;
+        }
+        .profile-pic { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
+        
+        .about-content { padding: 80px 60px; display: flex; flex-direction: column; justify-content: center; }
+        .about-content h2 { font-size: 2.5rem; line-height: 1; margin-bottom: 30px; text-transform: uppercase; }
+        .btn-big {
+            display: inline-block; margin-top: 30px; font-size: 1.2rem; font-weight: 900;
+            text-transform: uppercase; padding: 20px 40px; border: 2px solid var(--text-color);
+            text-decoration: none; color: var(--text-color);
+        }
+        .btn-big:hover { background-color: var(--accent-color); border-color: var(--accent-color); color: #fff; }
+
+        /* --- COOKIES --- */
+        #cookie-banner {
+            position: fixed; bottom: 20px; left: 20px; right: 20px;
+            background-color: var(--text-color); color: var(--bg-color);
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            z-index: 9990; border-radius: 5px;
+            font-size: 0.8rem; font-family: monospace;
+        }
+        .cookie-btn {
+            background: var(--bg-color); color: var(--text-color); border: none;
+            padding: 10px 20px; font-weight: bold; text-transform: uppercase; cursor: pointer;
+        }
+
+        /* Footer */
+        footer { padding: 30px 40px; display: flex; justify-content: space-between; font-size: 0.8rem; font-family: monospace; text-transform: uppercase; }
+
+        /* Media Query Móvil */
         @media (max-width: 768px) {
-            .hero { grid-template-columns: 1fr; padding: 60px 20px; }
-            h1 { font-size: 3.5rem; }
-            .portfolio-grid { grid-template-columns: 1fr; }
-            header { padding: 20px; }
-            #cookie-banner { width: 90%; right: 5%; bottom: 20px; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            #about { grid-template-columns: 1fr; }
+            .about-visual { height: 400px; border-right: none; border-bottom: 1px solid var(--text-color); }
+            h1 { font-size: 4rem; }
+            .project-text { opacity: 1; color: var(--bg-color); -webkit-text-stroke: 0; font-size: 2rem; } /* Texto siempre visible en móvil */
         }
-
     </style>
 </head>
 <body>
 
-<div class="container">
-    
+<div id="p5-canvas"></div>
+
+<div class="page-frame">
+
     <header>
-        <a href="#" class="logo">LAMOLAB<span>.</span></a>
+        <a href="#home" class="brand">LAMOLAB<span>Strategy & Design</span></a>
         <nav>
             <ul>
                 <li><a href="#work">Proyectos</a></li>
-                <li><a href="#studio">Agencia</a></li>
-                <li><a href="#contact">Contacto</a></li>
+                <li><a href="#about">Estudio</a></li>
+                <li><a href="mailto:hola@lamolab.com">Contacto</a></li>
             </ul>
         </nav>
     </header>
 
-    <section class="hero">
-        <h1>Estrategia<br><span style="color:var(--accent-color);">Visual</span> &<br>Identidad.</h1>
-        <div class="hero-intro">
-            <p><strong>Coraje para liderar el cambio.</strong></p>
-            <br>
-            <p>Fusionamos la consultoría estratégica con el diseño de alto impacto. Ayudamos a marcas valientes a encontrar su voz en un mercado saturado.</p>
+    <section id="home">
+        <h1>Diseño<br><span class="highlight-blue">Método</span><br>Propósito</h1>
+        <div class="hero-copy">
+            <p>El pensamiento supera a la orquesta. Identidad visual para marcas que buscan valor real, no solo estética vacía.</p>
         </div>
     </section>
 
-    <section id="work" class="portfolio-grid">
-        
-        <article class="project-card" onclick="window.location.href='#case1'">
-            <div class="content-top">
-                <div class="tags">01 / Branding / Packaging</div>
-                <h2 class="project-title">Naturaleza Muerta</h2>
-                <p>Rediseño integral para una marca de cosmética orgánica honesta.</p>
-            </div>
-            <div class="view-case">Ver Caso de Estudio &rarr;</div>
-        </article>
+    <section id="work">
+        <div class="work-header">
+            <h2 class="work-title">PORTFOLIO</h2>
+        </div>
 
-        <article class="project-card" onclick="window.location.href='#case2'">
-            <div class="content-top">
-                <div class="tags">02 / Editorial / Cultura</div>
-                <h2 class="project-title">Los Puentes de Zaragoza</h2>
-                <p>Libro de arte y patrimonio. Dirección de arte y maquetación.</p>
+        <div class="gallery-grid">
+            <div class="project-card" onclick="openModal('modal1')">
+                <img src="https://source.unsplash.com/random/800x800/?abstract,art" alt="Naturaleza Muerta" class="project-img">
+                <div class="project-overlay">
+                    <div class="project-text">NATURALEZA<br>MUERTA</div>
+                </div>
             </div>
-            <div class="view-case">Ver Caso de Estudio &rarr;</div>
-        </article>
 
-        <article class="project-card" onclick="window.location.href='#case3'">
-            <div class="content-top">
-                <div class="tags">03 / Activismo / Digital</div>
-                <h2 class="project-title">Change Your Approach</h2>
-                <p>Campaña social multicanal para la concienciación climática.</p>
+            <div class="project-card" onclick="openModal('modal2')">
+                <img src="https://source.unsplash.com/random/800x800/?bridge,architecture" alt="Puentes Zaragoza" class="project-img">
+                <div class="project-overlay">
+                    <div class="project-text">PUENTES DE<br>ZARAGOZA</div>
+                </div>
             </div>
-            <div class="view-case">Ver Caso de Estudio &rarr;</div>
-        </article>
 
-        <article class="project-card" onclick="window.location.href='#case4'">
-            <div class="content-top">
-                <div class="tags">04 / Identidad Corporativa</div>
-                <h2 class="project-title">Branward System</h2>
-                <p>Consultoría de marca y arquitectura visual para sector banca.</p>
+            <div class="project-card" onclick="openModal('modal3')">
+                <img src="https://source.unsplash.com/random/800x800/?protest,people" alt="Change Approach" class="project-img">
+                <div class="project-overlay">
+                    <div class="project-text">CHANGE YOUR<br>APPROACH</div>
+                </div>
             </div>
-            <div class="view-case">Ver Caso de Estudio &rarr;</div>
-        </article>
-
+        </div>
     </section>
 
-    <section id="contact" class="cta-section">
-        <h2 style="font-size: 2.5rem; margin-bottom: 20px;">¿Hablamos de tu próximo proyecto?</h2>
-        <p>Estamos listos para transformar tu visión en una marca sólida.</p>
-        <a href="mailto:hola@lamolab.com" class="btn-primary">Iniciar Conversación</a>
+    <section id="about">
+        <div class="about-visual">
+            <img src="foto.png" alt="Emilio Padilla" class="profile-pic">
+        </div>
+        
+        <div class="about-content">
+            <h2>Del Control de Calidad al <span style="color: var(--highlight);">Diseño Consciente</span>.</h2>
+            <p><strong>Lamolab</strong> nace de una convicción: el diseño no es decoración, es estrategia. Tras años liderando departamentos de calidad, traslado esa metodología rigurosa al universo creativo.</p>
+            <a href="mailto:hola@lamolab.com" class="btn-big">Solicitar Presupuesto →</a>
+        </div>
     </section>
 
     <footer>
-        <div>© 2025 LAMOLAB. Todos los derechos reservados.</div>
-        <div>Zaragoza, España</div>
-        <div>
-            <a href="#">Legal</a> | <a href="#">Privacidad</a>
-        </div>
+        <div>© 2025 Lamolab</div>
+        <div>Zaragoza, ES</div>
     </footer>
-
 </div>
 
 <div id="cookie-banner">
-    <div style="font-weight: 700; text-transform: uppercase;">🍪 Política de Privacidad</div>
-    <p>Usamos cookies propias y de terceros para mejorar tu experiencia y mostrarte contenido relacionado con tus preferencias (y porque la ley nos obliga).</p>
-    <div class="cookie-buttons">
-        <button class="btn-cookie btn-accept" onclick="acceptCookies()">Aceptar Todo</button>
-        <button class="btn-cookie btn-deny" onclick="acceptCookies()">Solo Necesarias</button>
+    <div>Utilizamos cookies propias para mejorar la experiencia de usuario.</div>
+    <button class="cookie-btn" onclick="hideCookies()">ACEPTAR</button>
+</div>
+
+<div id="modal1" class="modal">
+    <span class="close-modal" onclick="closeModal('modal1')">&times;</span>
+    <div class="modal-content">
+        <h2 class="modal-title">NATURALEZA MUERTA</h2>
+        <p class="modal-desc">Dirección de Arte. Un proyecto que explora la inmovilidad a través de la luz y la composición. El objetivo fue reinterpretar los clásicos bodegones con una estética contemporánea.</p>
+        <img src="https://source.unsplash.com/random/1200x800/?stilllife" class="modal-img">
+        <img src="https://source.unsplash.com/random/1200x800/?shadow" class="modal-img">
+    </div>
+</div>
+
+<div id="modal2" class="modal">
+    <span class="close-modal" onclick="closeModal('modal2')">&times;</span>
+    <div class="modal-content">
+        <h2 class="modal-title">PUENTES DE ZARAGOZA</h2>
+        <p class="modal-desc">Diseño Editorial. Una publicación que analiza la arquitectura y la conexión urbana de Zaragoza. Maquetación basada en retículas rígidas que imitan la ingeniería civil.</p>
+        <img src="https://source.unsplash.com/random/1200x800/?bridge" class="modal-img">
+        <img src="https://source.unsplash.com/random/1200x800/?book" class="modal-img">
+    </div>
+</div>
+
+<div id="modal3" class="modal">
+    <span class="close-modal" onclick="closeModal('modal3')">&times;</span>
+    <div class="modal-content">
+        <h2 class="modal-title">CHANGE YOUR APPROACH</h2>
+        <p class="modal-desc">Campaña de Activismo. Estrategia visual para concienciar sobre el cambio de mentalidad necesario en la crisis ecosocial. Tipografía agresiva y colores de alerta.</p>
+        <img src="https://source.unsplash.com/random/1200x800/?poster" class="modal-img">
     </div>
 </div>
 
 <script>
-    // Script simple para cerrar el banner de cookies
-    function acceptCookies() {
-        const banner = document.getElementById('cookie-banner');
-        banner.style.opacity = '0';
-        banner.style.transform = 'translateY(100%)';
-        setTimeout(() => {
-            banner.style.display = 'none';
-        }, 500); // Espera a que termine la animación
+    // 1. Lógica p5.js para el cursor
+    function setup() {
+        let canvas = createCanvas(windowWidth, windowHeight);
+        canvas.parent('p5-canvas');
+    }
+
+    function draw() {
+        clear(); // Limpia el canvas en cada frame para que no deje rastro
+        
+        // Dibuja el círculo azul que sigue al ratón
+        // Color Azul Klein (#15038C) -> RGB (21, 3, 140)
+        fill(21, 3, 140);
+        noStroke();
+        
+        // Lerp para suavizar el movimiento (opcional, aquí es directo)
+        ellipse(mouseX, mouseY, 20, 20);
+    }
+
+    function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+    }
+
+    // 2. Lógica Modals
+    function openModal(id) {
+        document.getElementById(id).style.display = "block";
+        // Bloquear scroll del fondo
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+
+    // 3. Lógica Cookies
+    function hideCookies() {
+        document.getElementById('cookie-banner').style.display = "none";
     }
 </script>
 
